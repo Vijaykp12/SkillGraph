@@ -7,6 +7,7 @@ import { Share2, RefreshCw, ZoomIn, ZoomOut, Maximize2, Compass } from "lucide-r
 export default function InteractiveGraphPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<any>(null);
+  const layoutRef = useRef<any>(null);
   const [cyInstance, setCyInstance] = useState<any>(null);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +54,13 @@ export default function InteractiveGraphPage() {
       });
 
       if (containerRef.current) {
+        if (layoutRef.current) {
+          try {
+            layoutRef.current.stop();
+          } catch (e) {
+            console.error("Error stopping cytoscape layout:", e);
+          }
+        }
         if (cyRef.current) {
           try {
             cyRef.current.destroy();
@@ -108,26 +116,31 @@ export default function InteractiveGraphPage() {
                 "shadow-opacity": 0.8
               } as any
             }
-          ],
-          layout: {
-            name: "cose",
-            idealEdgeLength: 80,
-            nodeOverlap: 20,
-            refresh: 20,
-            fit: true,
-            padding: 30,
-            randomize: true,
-            componentSpacing: 100,
-            nodeRepulsion: 400000,
-            edgeElasticity: 100,
-            nestingFactor: 5,
-            gravity: 80,
-            numIter: 1000,
-            initialTemp: 200,
-            coolingFactor: 0.95,
-            minTemp: 1.0
-          } as any
+          ]
         });
+
+        // Initialize and run layout separately, caching its reference
+        const layout = cy.layout({
+          name: "cose",
+          idealEdgeLength: 80,
+          nodeOverlap: 20,
+          refresh: 20,
+          fit: true,
+          padding: 30,
+          randomize: true,
+          componentSpacing: 100,
+          nodeRepulsion: 400000,
+          edgeElasticity: 100,
+          nestingFactor: 5,
+          gravity: 80,
+          numIter: 1000,
+          initialTemp: 200,
+          coolingFactor: 0.95,
+          minTemp: 1.0
+        } as any);
+
+        layout.run();
+        layoutRef.current = layout;
 
         // Event hooks
         cy.on("tap", "node", async (evt) => {
@@ -172,6 +185,13 @@ export default function InteractiveGraphPage() {
   useEffect(() => {
     initGraph();
     return () => {
+      if (layoutRef.current) {
+        try {
+          layoutRef.current.stop();
+        } catch (e) {
+          console.error("Error stopping cytoscape layout on unmount:", e);
+        }
+      }
       if (cyRef.current) {
         try {
           cyRef.current.destroy();

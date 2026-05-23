@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.db.database import get_db
+from app.db.database import get_db, get_neo4j_driver
 from app.models.models import User, UserProfile
 from app.schemas.schemas import UserCreate, UserResponse, Token, ProfileResponse, ProfileUpdate
 from app.core.security import get_password_hash, verify_password, create_access_token, get_current_user
@@ -116,7 +116,19 @@ async def upload_resume(
         raise HTTPException(status_code=400, detail="Only PDF resumes are supported.")
         
     contents = await file.read()
-    parsed_data = parse_resume_pdf(contents)
+    
+    # Fetch all skill names from Neo4j database to pass to parser
+    db_skills = []
+    try:
+        driver = get_neo4j_driver()
+        async with driver.session() as session:
+            result = await session.run("MATCH (s:Skill) RETURN s.name AS name")
+            async for record in result:
+                db_skills.append(record["name"])
+    except Exception as e:
+        print(f"Error querying Neo4j skills: {e}")
+        
+    parsed_data = parse_resume_pdf(contents, existing_skills=db_skills)
     
     res = await db.execute(select(UserProfile).where(UserProfile.user_id == current_user.id))
     profile = res.scalars().first()
