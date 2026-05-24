@@ -43,7 +43,16 @@ async def twin_simulator(
     Simulates a Career Twin transition sequence, showing multi-step career paths,
     sub-step skill gaps, and transition momentum, persisting the session.
     """
-    result = await recommender.career_twin_simulation(req.start_occupation, req.target_occupation)
+    # Fetch user skills from database profile
+    res = await db.execute(select(UserProfile).where(UserProfile.user_id == current_user.id))
+    profile = res.scalars().first()
+    user_skills = profile.parsed_skills if profile else []
+
+    result = await recommender.career_twin_simulation(
+        req.start_occupation, 
+        req.target_occupation,
+        user_skills=user_skills
+    )
     
     # Persist the simulation run for historical charting
     sim_session = CareerTwinSimulation(

@@ -202,7 +202,7 @@ class SkillGraphRecommender:
             "missing_skills": missing
         }
 
-    async def career_twin_simulation(self, start_occupation: str, target_occupation: str) -> dict:
+    async def career_twin_simulation(self, start_occupation: str, target_occupation: str, user_skills: list[str] = None) -> dict:
         """
         Traces a career transition sequence from start to target.
         Generates transition steps, skills gaps, and a momentum indicator.
@@ -247,9 +247,13 @@ class SkillGraphRecommender:
             nxt = steps[i+1]
             
             # Analyze gap for transition
-            # For simplicity, extract mock user skills as current occupation standard skills
-            curr_skills_data = await self.analyze_skill_gap([], curr)
-            curr_skills = [s["name"] for s in curr_skills_data["missing_skills"][:4]]
+            if i == 0 and user_skills is not None:
+                curr_skills = user_skills
+            else:
+                # For subsequent steps or if user_skills not provided, 
+                # extract mock user skills as current occupation standard skills
+                curr_skills_data = await self.analyze_skill_gap([], curr)
+                curr_skills = [s["name"] for s in curr_skills_data["missing_skills"][:4]]
             
             gap_data = await self.analyze_skill_gap(curr_skills, nxt)
             
