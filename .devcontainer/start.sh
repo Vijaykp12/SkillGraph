@@ -2,6 +2,10 @@
 
 echo "=== Starting SkillGraph Services ==="
 
+# Kill existing frontend/backend processes
+pkill -f "uvicorn app.main:app"
+pkill -f "next dev"
+
 # Start databases
 cd /workspaces/SkillGraph/infrastructure/docker
 docker compose up postgres redis neo4j -d
@@ -19,4 +23,4 @@ cd /workspaces/SkillGraph/frontend
 
 nohup npm run dev > frontend.log 2>&1 &
 
-echo "=== SkillGraph Started ==="
+echo "=== SkillGraph Started Successfully ==="
