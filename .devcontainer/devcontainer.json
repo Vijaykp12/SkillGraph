@@ -47,5 +47,6 @@
     }
   },
   "forwardPorts": [3000, 8000, 5432, 6379, 7474, 7687],
-  "postCreateCommand": "echo 'Codespace successfully created! Please read codespaces_manual.md to launch SkillGraph.'"
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "bash .devcontainer/start.sh"
 }
