@@ -8,6 +8,7 @@ export default function InteractiveGraphPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<any>(null);
   const layoutRef = useRef<any>(null);
+  const latestLoadIdRef = useRef<number>(0);
   const [cyInstance, setCyInstance] = useState<any>(null);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -16,9 +17,13 @@ export default function InteractiveGraphPage() {
 
   // Core load function
   const initGraph = async (centerId?: string) => {
+    const loadId = ++latestLoadIdRef.current;
     setLoading(true);
     try {
       const data = await getGraphData(centerId);
+      if (loadId !== latestLoadIdRef.current) {
+        return;
+      }
       if (!data || !data.nodes || !data.edges) {
         console.error("Invalid graph data received:", data);
         setLoading(false);
@@ -119,6 +124,15 @@ export default function InteractiveGraphPage() {
           ]
         });
 
+        // Patch endBatch to prevent crashes when instance is destroyed during layout frames
+        const originalEndBatch = (cy as any).endBatch;
+        (cy as any).endBatch = function() {
+          if ((cy as any).destroyed() || !(cy as any).renderer()) {
+            return cy;
+          }
+          return originalEndBatch.apply(cy, arguments);
+        };
+
         // Initialize and run layout separately, caching its reference
         const layout = cy.layout({
           name: "cose",
@@ -178,7 +192,9 @@ export default function InteractiveGraphPage() {
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (loadId === latestLoadIdRef.current) {
+        setLoading(false);
+      }
     }
   };
 
