@@ -23,11 +23,11 @@ yarn-debug.log*
 yarn-error.log*
 
 # ML Indexes & Model checkpoints
-data/faiss_index.bin
-data/faiss_metadata.pkl
-data/gnn_model.pt
-data/skill_id_map.pkl
-data/occ_id_map.pkl
+backend/data/faiss_index.bin
+backend/data/faiss_metadata.pkl
+backend/data/gnn_model.pt
+backend/data/skill_id_map.pkl
+backend/data/occ_id_map.pkl
 
 # IDEs
 .vscode/
