@@ -17,6 +17,31 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8000"
     ]
 
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: str | List[str]) -> List[str]:
+        if isinstance(v, str):
+            if not v.startswith("["):
+                origins = [i.strip() for i in v.split(",")]
+            else:
+                import json
+                origins = json.loads(v)
+        elif isinstance(v, list):
+            origins = v
+        else:
+            origins = []
+
+        # Add dynamic GitHub Codespaces origins if environment details exist
+        codespace_name = os.getenv("CODESPACE_NAME")
+        port_domain = os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN", "app.github.dev")
+        if codespace_name:
+            origins.append(f"https://{codespace_name}-3000.{port_domain}")
+            origins.append(f"https://{codespace_name}-8000.{port_domain}")
+            origins.append(f"http://{codespace_name}-3000.{port_domain}")
+            origins.append(f"http://{codespace_name}-8000.{port_domain}")
+            
+        return origins
+
     # Postgres Configurations
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_USER: str = "postgres"
@@ -47,8 +72,8 @@ class Settings(BaseSettings):
 
     # AI Model & FAISS Configurations
     EMBEDDING_MODEL_NAME: str = "all-MiniLM-L6-v2"
-    FAISS_INDEX_PATH: str = "data/faiss_index.bin"
-    FAISS_METADATA_PATH: str = "data/faiss_metadata.pkl"
+    FAISS_INDEX_PATH: str = "data/faiss_index.bin" # Binary File
+    FAISS_METADATA_PATH: str = "data/faiss_metadata.pkl" # Pickle Object (Python -> Binary Object)
     
     # GNN Parameters
     GNN_HIDDEN_CHANNELS: int = 128
@@ -57,7 +82,7 @@ class Settings(BaseSettings):
     GNN_LEARNING_RATE: float = 0.001
     GNN_EPOCHS: int = 50
     GNN_BATCH_SIZE: int = 256
-    GNN_MODEL_SAVE_PATH: str = "data/gnn_model.pt"
+    GNN_MODEL_SAVE_PATH: str = "data/gnn_model.pt" # PyTorch Model Object
 
     model_config = SettingsConfigDict(
         env_file=".env",

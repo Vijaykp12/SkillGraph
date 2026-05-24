@@ -1,0 +1,57 @@
+{
+  "name": "SkillGraph Codespace",
+  "image": "mcr.microsoft.com/devcontainers/universal:2-linux",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.analysis.extraPaths": [
+          "${workspaceFolder}/backend"
+        ]
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.tailwindcss-intellisense",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js Frontend",
+      "onAutoForward": "openPreview"
+    },
+    "8000": {
+      "label": "FastAPI Backend",
+      "onAutoForward": "silent"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "7474": {
+      "label": "Neo4j HTTP Console",
+      "onAutoForward": "silent"
+    },
+    "7687": {
+      "label": "Neo4j Bolt",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis Broker",
+      "onAutoForward": "silent"
+    }
+  },
+  "forwardPorts": [3000, 8000, 5432, 6379, 7474, 7687],
+  "postCreateCommand": "echo 'Codespace successfully created! Please read codespaces_manual.md to launch SkillGraph.'"
+}

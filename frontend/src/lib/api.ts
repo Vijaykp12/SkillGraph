@@ -1,4 +1,17 @@
-const BASE_URL = "http://localhost:8000/api/v1";
+let BASE_URL = "http://localhost:8000/api/v1";
+let WS_URL = "ws://localhost:8000/api/v1/assistant/ws/chat";
+
+if (typeof window !== "undefined") {
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol;
+  
+  if (hostname.endsWith(".github.dev") || hostname.endsWith(".app.github.dev") || hostname.includes("preview.app.github.dev")) {
+    const backendHostname = hostname.replace("-3000", "-8000");
+    const wsProtocol = protocol === "https:" ? "wss:" : "ws:";
+    BASE_URL = `${protocol}//${backendHostname}/api/v1`;
+    WS_URL = `${wsProtocol}//${backendHostname}/api/v1/assistant/ws/chat`;
+  }
+}
 
 function getHeaders() {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -152,7 +165,7 @@ export async function getNodeDetails(nodeId: string) {
 
 export function getChatWebSocket(): WebSocket {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
-  const ws = new WebSocket("ws://localhost:8000/api/v1/assistant/ws/chat");
+  const ws = new WebSocket(WS_URL);
   
   ws.onopen = () => {
     // Send auth token as first frame
