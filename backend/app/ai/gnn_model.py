@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import HeteroConv, SAGEConv, GATConv, Linear
 from app.core.config import settings
 
-class SkillGraphHeteroGNN(nn.Module):
+class SkillGraphHeteroGNN(nn.Module): # nn.Module => core neural network working component , provides trainable parameters and supports forward and backward propogation.
     def __init__(self, metadata, hidden_channels: int, out_channels: int, num_layers: int = 2):
         super().__init__()
         

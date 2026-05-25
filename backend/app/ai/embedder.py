@@ -34,7 +34,7 @@ class SkillGraphEmbedder:
 
     def get_embedding(self, text: str) -> np.ndarray:
         """Generates a 384-dimensional embedding for a text query."""
-        embedding = self.model.encode([text])[0]
+        embedding = self.model.encode([text])[0]  # Returns [[]], so get 0th array and [text] is used instead of just text because encode expects [].
         return np.array(embedding).astype('float32')
 
     def search_similar(self, query: str, top_k: int = 5, item_type: str = None) -> list:
@@ -49,7 +49,8 @@ class SkillGraphEmbedder:
                 return []
                 
         # Embed and normalize query
-        query_vector = self.get_embedding(query).reshape(1, -1)
+        # Reshape(1, -1) => means we re-shape the [384,] to [1,384] , 1 means 1 row and -1 means auto-calculate columns
+        query_vector = self.get_embedding(query).reshape(1, -1) # FAISS expects a 2D array of shape (number of vectors, dimension of vectors)
         faiss.normalize_L2(query_vector)
         
         # Search index. Since it's IndexFlatIP on normalized vectors, similarity is Cosine similarity

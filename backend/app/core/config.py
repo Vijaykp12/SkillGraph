@@ -83,6 +83,9 @@ class Settings(BaseSettings):
     GNN_EPOCHS: int = 50
     GNN_BATCH_SIZE: int = 256
     GNN_MODEL_SAVE_PATH: str = "data/gnn_model.pt" # PyTorch Model Object
+    
+    # Gemini API Configuration
+    GEMINI_API_KEY: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
