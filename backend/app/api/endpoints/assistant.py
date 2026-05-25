@@ -50,7 +50,7 @@ def get_agent_response(user_message: str, profile_summary: str) -> str:
     )
 
 async def call_gemini_non_stream(messages: list[ChatMessage], profile_summary: str, api_key: str) -> str:
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     
     contents = []
     for msg in messages:
@@ -90,7 +90,7 @@ async def call_gemini_non_stream(messages: list[ChatMessage], profile_summary: s
         return data["candidates"][0]["content"]["parts"][0]["text"]
 
 async def call_gemini_stream(messages: list[ChatMessage], profile_summary: str, api_key: str):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key={api_key}&alt=sse"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key={api_key}&alt=sse"
     
     contents = []
     for msg in messages:
