@@ -1,5 +1,5 @@
-let BASE_URL = "http://localhost:8000/api/v1";
-let WS_URL = "ws://localhost:8000/api/v1/assistant/ws/chat";
+let BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+let WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/v1/assistant/ws/chat";
 
 if (typeof window !== "undefined") {
   const hostname = window.location.hostname;
