@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks, Header
 from neo4j import AsyncDriver
 from app.db.database import get_neo4j, get_db
 from app.ai.embedder import embedder_instance
@@ -6,6 +6,8 @@ from app.models.models import User, UserProfile
 from app.core.security import get_current_user
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from app.core.config import settings
+from app.ai.train import train_model
 
 router = APIRouter()
 
@@ -287,3 +289,19 @@ def get_mock_explorer_graph(center_id: str = None) -> dict:
         return {"nodes": filtered_nodes, "edges": filtered_edges}
         
     return {"nodes": nodes, "edges": edges}
+
+
+@router.post("/retrain")
+async def trigger_retrain(
+    background_tasks: BackgroundTasks,
+    x_admin_token: str = Header(None, description="Admin secret token to bypass OAuth")
+):
+    """
+    Triggers GNN model training in the background. Free alternative to Celery.
+    Can be run using X-Admin-Token header.
+    """
+    if not x_admin_token or x_admin_token != settings.SECRET_KEY:
+        raise HTTPException(status_code=403, detail="Invalid admin token.")
+    
+    background_tasks.add_task(train_model)
+    return {"status": "GNN model retraining started in the background."}
