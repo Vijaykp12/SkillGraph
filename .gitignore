@@ -22,12 +22,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# ML Indexes & Model checkpoints
-backend/data/faiss_index.bin
-backend/data/faiss_metadata.pkl
-backend/data/gnn_model.pt
-backend/data/skill_id_map.pkl
-backend/data/occ_id_map.pkl
+# ML Indexes & Model checkpoints (tracked in git for zero-warmup container deployments)
+# backend/data/faiss_index.bin
+# backend/data/faiss_metadata.pkl
+# backend/data/gnn_model.pt
+# backend/data/skill_id_map.pkl
+# backend/data/occ_id_map.pkl
 
 # IDEs
 .vscode/
