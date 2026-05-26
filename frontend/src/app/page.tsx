@@ -141,17 +141,7 @@ export default function WelcomePage() {
           </form>
         </div>
 
-        {/* Demo credentials hint */}
-        <div className="mt-6 p-4 rounded-xl glass-card flex items-start gap-3 border border-white/5">
-          <ShieldCheck className="h-5 w-5 text-cyber-cyan flex-shrink-0 mt-0.5" />
-          <div className="text-xs text-gray-400">
-            <span className="font-semibold text-white">Default Sandbox Admin:</span>
-            <br />
-            Email: <code className="text-cyber-cyan">admin@skillgraph.ai</code>
-            <br />
-            Password: <code className="text-cyber-cyan">admin123</code>
-          </div>
-        </div>
+
       </div>
     </div>
   );
