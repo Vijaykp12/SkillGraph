@@ -1,13 +1,9 @@
 import os
 import pickle
 import numpy as np
-import torch
-import torch.nn.functional as F
 from app.core.config import settings
 from app.db.database import get_neo4j_driver
 from app.ai.embedder import embedder_instance
-from app.ai.dataset_loader import dataset_loader
-from app.ai.gnn_model import SkillGraphAIModel
 
 class SkillGraphRecommender:
     def __init__(self):
@@ -46,6 +42,14 @@ class SkillGraphRecommender:
             return
             
         try:
+            import torch
+            # Apply CPU thread limits to PyTorch to save memory
+            torch.set_num_threads(1)
+            torch.set_num_interop_threads(1)
+            
+            from app.ai.dataset_loader import dataset_loader
+            from app.ai.gnn_model import SkillGraphAIModel
+
             data, skill_id_map, occ_id_map = await dataset_loader.load_heterodata()
             self.skill_map = skill_id_map
             self.occ_map = occ_id_map

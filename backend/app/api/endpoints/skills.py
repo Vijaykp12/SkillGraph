@@ -7,7 +7,6 @@ from app.core.security import get_current_user
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.core.config import settings
-from app.ai.train import train_model
 
 router = APIRouter()
 
@@ -303,5 +302,6 @@ async def trigger_retrain(
     if not x_admin_token or x_admin_token != settings.SECRET_KEY:
         raise HTTPException(status_code=403, detail="Invalid admin token.")
     
+    from app.ai.train import train_model
     background_tasks.add_task(train_model)
     return {"status": "GNN model retraining started in the background."}
