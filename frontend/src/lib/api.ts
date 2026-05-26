@@ -1,11 +1,14 @@
-let BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-let WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/v1/assistant/ws/chat";
+let BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://skillgraph-backend-14k8.onrender.com/api/v1";
+let WS_URL = process.env.NEXT_PUBLIC_WS_URL || "wss://skillgraph-backend-14k8.onrender.com/api/v1/assistant/ws/chat";
 
 if (typeof window !== "undefined") {
   const hostname = window.location.hostname;
   const protocol = window.location.protocol;
   
-  if (hostname.endsWith(".github.dev") || hostname.endsWith(".app.github.dev") || hostname.includes("preview.app.github.dev")) {
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    BASE_URL = "http://localhost:8000/api/v1";
+    WS_URL = "ws://localhost:8000/api/v1/assistant/ws/chat";
+  } else if (hostname.endsWith(".github.dev") || hostname.endsWith(".app.github.dev") || hostname.includes("preview.app.github.dev")) {
     const backendHostname = hostname.replace("-3000", "-8000");
     const wsProtocol = protocol === "https:" ? "wss:" : "ws:";
     BASE_URL = `${protocol}//${backendHostname}/api/v1`;
