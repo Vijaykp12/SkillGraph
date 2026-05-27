@@ -62,15 +62,28 @@ git checkout -b main
 # Configure remote with your username and write token embedded to bypass password authentication
 git remote add hf https://YOUR_USERNAME:YOUR_WRITE_TOKEN@huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
 
-# Add files, making sure to include the data cache!
+# Add files, excluding large binary files (Hugging Face blocks pushing binary files directly via standard Git)
 git add .
-git commit -m "deploy: initial Hugging Face deployment"
+git rm --cached data/faiss_index.bin data/fused_embeddings.pkl data/gnn_model.pt
+git commit -m "deploy: initial Hugging Face deployment (code only)"
 
-# Force push to the Hugging Face remote
+# Force push code files to Hugging Face
 git push --force hf main
 ```
 
-*Note: Replace `YOUR_USERNAME` with `vijayk12`, `YOUR_SPACE_NAME` with `skillgraph-backend`, and `YOUR_WRITE_TOKEN` with your Hugging Face User Access Token (which you can generate in your Hugging Face Profile Settings -> Access Tokens with the **Write** role).*
+*Note: Replace `YOUR_USERNAME` with `vijayk12`, `YOUR_SPACE_NAME` with `skillgraph-backend`, and `YOUR_WRITE_TOKEN` with your Hugging Face User Access Token (Write).*
+
+### Step 3.5: Upload Binary Files via Hugging Face Web UI
+Hugging Face requires Git LFS for binary files. The simplest way to handle this without setting up Git LFS locally on Windows is to upload them directly in your browser:
+1. Open your Space page: `https://huggingface.co/spaces/vijayk12/skillgraph-backend`
+2. Click on the **Files** tab at the top.
+3. Click **Add file** (dropdown on the top right) -> **Upload files**.
+4. Drag and drop the three binary files from your local `backend/data/` folder:
+   * `faiss_index.bin`
+   * `fused_embeddings.pkl`
+   * `gnn_model.pt`
+5. Change the target directory name to `data` (they should be placed in `data/faiss_index.bin`, etc.).
+6. Write a commit message (e.g., "add GNN model and embeddings cache") and click **Commit changes to main**. Hugging Face will automatically handle LFS upload in the background!
 
 ---
 
