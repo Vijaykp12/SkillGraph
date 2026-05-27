@@ -8,14 +8,14 @@ class SkillGraphHeteroGNN(nn.Module): # nn.Module => core neural network working
     def __init__(self, metadata, hidden_channels: int, out_channels: int, num_layers: int = 2):
         super().__init__()
         
-        self.convs = nn.ModuleList()
+        self.convs = nn.ModuleList() # Declares Storage for multiple GNNs
         # Layer 1
         conv1_dict = {}
         for edge_type in metadata[1]:
             # edge_type is (src_type, rel_type, dst_type)
             src_type, _, dst_type = edge_type
             # We use GATConv for expressive attention-based message passing
-            conv1_dict[edge_type] = GATConv((-1, -1), hidden_channels, heads=2, concat=False, add_self_loops=False)
+            conv1_dict[edge_type] = GATConv((-1, -1), hidden_channels, heads=2, concat=False, add_self_loops=False) # (-1, -1) => means that the dimensions of the source and destination nodes can be inferred from the input data
         self.convs.append(HeteroConv(conv1_dict, aggr='mean'))
         
         # Subsequent Layers

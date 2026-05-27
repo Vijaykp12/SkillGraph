@@ -119,6 +119,20 @@ async def train_model():
     # Save model weights
     torch.save(model.state_dict(), settings.GNN_MODEL_SAVE_PATH)
     print(f"GNN Model successfully trained and saved to {settings.GNN_MODEL_SAVE_PATH}")
+
+    # Compute and save fused embeddings cache
+    print("Computing and caching GNN fused embeddings...")
+    model.eval()
+    with torch.no_grad():
+        fused = model.get_fused_embeddings(data.x_dict, data.edge_index_dict)
+        fused_embeddings = {
+            "skill": fused["skill"].cpu().numpy(),
+            "occupation": fused["occupation"].cpu().numpy()
+        }
+    with open("data/fused_embeddings.pkl", "wb") as f:
+        pickle.dump(fused_embeddings, f)
+    print("GNN fused embeddings successfully cached to data/fused_embeddings.pkl")
+
     return True
 
 if __name__ == "__main__":

@@ -16,6 +16,22 @@ class SkillGraphRecommender:
 
     def load_model(self):
         """Loads trained GNN model and ID mapping files if available."""
+        # 1. First check if we have pre-computed fused GNN embeddings (preferred production route)
+        if os.path.exists("data/fused_embeddings.pkl") and os.path.exists("data/skill_id_map.pkl"):
+            try:
+                with open("data/skill_id_map.pkl", "rb") as f:
+                    self.skill_map = pickle.load(f)
+                with open("data/occ_id_map.pkl", "rb") as f:
+                    self.occ_map = pickle.load(f)
+                with open("data/fused_embeddings.pkl", "rb") as f:
+                    self.fused_embeddings = pickle.load(f)
+                self.model = "LOADED"
+                print("Pre-computed GNN fused embeddings successfully loaded from disk.")
+                return
+            except Exception as e:
+                print(f"Error loading cached GNN fused embeddings: {e}. Falling back to lazy loading.")
+
+        # 2. Check if we can lazy-load via PyTorch weights (fallback)
         if os.path.exists(settings.GNN_MODEL_SAVE_PATH) and os.path.exists("data/skill_id_map.pkl"):
             try:
                 # Load mappings
@@ -38,6 +54,8 @@ class SkillGraphRecommender:
 
     async def _lazy_load_gnn_fused(self):
         """Loads GNN model weights and computes fused embeddings."""
+        if self.model == "LOADED":
+            return
         if self.model != "PENDING_LAZY_LOAD" and self.fused_embeddings is not None:
             return
             
