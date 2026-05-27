@@ -31,7 +31,8 @@ def get_neo4j_driver() -> AsyncDriver:
     if neo4j_driver is None:
         neo4j_driver = AsyncGraphDatabase.driver(
             settings.NEO4J_URI,
-            auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
+            auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD),
+            connection_timeout=2.0
         )
     return neo4j_driver
 

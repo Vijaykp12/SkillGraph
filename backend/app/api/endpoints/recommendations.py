@@ -131,22 +131,21 @@ async def get_learning_recommendations(
     # 3. Query Neo4j for learning resources connected to missing skills
     try:
         async with driver.session() as session:
-            for skill_id in missing_skill_ids:
-                query = """
-                MATCH (s:Skill {id: $skill_id})-[:LEARNED_WITH]->(r:LearningResource)
-                RETURN r.name as name, r.provider as provider, r.duration as duration
-                """
-                res_db = await session.run(query, skill_id=skill_id)
-                async for rec in res_db:
-                    recommendations.append({
-                        "skill_target": skill_id.replace("sk_", "").replace("_", " ").title(),
-                        "resource_name": f"{rec['provider']}: {rec['name']}",
-                        "duration": rec["duration"],
-                        "url": "#"
-                    })
-    except Exception:
-        # Fallback Mock if DB offline/empty
-        pass
+            query = """
+            MATCH (s:Skill)-[:LEARNED_WITH]->(r:LearningResource)
+            WHERE s.id IN $missing_ids
+            RETURN s.id as skill_id, r.name as name, r.provider as provider, r.duration as duration
+            """
+            res_db = await session.run(query, missing_ids=missing_skill_ids)
+            async for rec in res_db:
+                recommendations.append({
+                    "skill_target": rec["skill_id"].replace("sk_", "").replace("_", " ").title(),
+                    "resource_name": f"{rec['provider']}: {rec['name']}",
+                    "duration": rec["duration"],
+                    "url": "#"
+                })
+    except Exception as e:
+        print(f"Error querying Neo4j learning resources: {e}")
         
     if not recommendations:
         # Build nice fallback recommendations from standard mocks
