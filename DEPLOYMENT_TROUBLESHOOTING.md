@@ -177,3 +177,35 @@ git push --force hf main
 ```
 Hugging Face will rebuild and run the server successfully without crashes!
 
+---
+
+## 📌 Incident 6: Failed to Load GNN Model and FAISS Index on Hugging Face Space Deployment
+
+### 🔍 Symptoms
+* API logs show:
+  ```
+  Failed to load GNN model. Falling back to semantic-only: [Errno 2] No such file or directory: 'data/gnn_model.pt'
+  FAISS index files not found. Vector search will be unavailable until indexed.
+  FAISS index is not initialized. Returning empty.
+  ```
+* Career transitions, career twin simulations, and gap analysis requests do not use the GNN model and fallback to semantic-only (or return empty recommendations).
+
+### 🧩 Root Cause
+1. **Directory Path Mismatch**: Hugging Face rejects pushing large binary files via git push. The user uploaded the model checkpoints (`gnn_model.pt`, `fused_embeddings.pkl`, `faiss_index.bin`, `faiss_metadata.pkl`) using the Hugging Face Web UI, but placed them in the repository's root directory instead of the expected `data/` subdirectory.
+2. **Missing Mappings due to Gitignore**: The GNN ID mapping files (`skill_id_map.pkl` and `occ_id_map.pkl`) were listed in `backend/.gitignore` under `data/*.pkl` and were thus omitted during `git push`. Without these mappings, GNN recommendations cannot match node IDs to embedding indices.
+
+### 🚀 Solution
+1. **Root-Level Fallback Paths**: We modified the loading logic in `backend/app/ai/recommender.py` and `backend/app/ai/embedder.py` to check for model files at the root directory (`.`) if they are missing in the `data/` directory.
+2. **Git-Trackable JSON Mappings**: Instead of relying solely on binary `.pkl` mapping files, we updated `backend/app/ai/train.py` to save mapping structures as JSON files (`skill_id_map.json` and `occ_id_map.json`). JSON files are text-based and are NOT blocked by Hugging Face's Git push filters.
+3. **JSON Loading Support**: We added support in `recommender.py` to automatically load from the JSON mapping files if pickle files are not found.
+
+### 📋 How to Deploy the Fix
+1. Commit the JSON mapping files and code fixes, then push them to Hugging Face:
+   ```bash
+   git add app/ai/embedder.py app/ai/recommender.py app/ai/train.py data/skill_id_map.json data/occ_id_map.json
+   git commit -m "fix: fall back to root folder for model files and support JSON ID mappings"
+   git push --force hf main
+   ```
+2. The Hugging Face container will automatically rebuild, detect the JSON mapping files via Git, locate the binary model files at the root level, and run the GNN recommendation engine successfully.
+
+

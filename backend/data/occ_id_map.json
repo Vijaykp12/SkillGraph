@@ -1,0 +1,38 @@
+{
+  "to_idx": {
+    "occ_ds": 0,
+    "occ_mle": 1,
+    "occ_fsd": 2,
+    "occ_devops": 3,
+    "occ_de": 4,
+    "occ_ca": 5,
+    "occ_fed": 6,
+    "occ_bed": 7,
+    "occ_sys_eng": 8,
+    "occ_ai_res": 9,
+    "occ_pm": 10,
+    "occ_sec_eng": 11,
+    "occ_qa": 12,
+    "occ_mobile": 13,
+    "occ_dba": 14,
+    "occ_designer": 15
+  },
+  "to_id": {
+    "0": "occ_ds",
+    "1": "occ_mle",
+    "2": "occ_fsd",
+    "3": "occ_devops",
+    "4": "occ_de",
+    "5": "occ_ca",
+    "6": "occ_fed",
+    "7": "occ_bed",
+    "8": "occ_sys_eng",
+    "9": "occ_ai_res",
+    "10": "occ_pm",
+    "11": "occ_sec_eng",
+    "12": "occ_qa",
+    "13": "occ_mobile",
+    "14": "occ_dba",
+    "15": "occ_designer"
+  }
+}

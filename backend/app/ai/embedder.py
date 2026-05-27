@@ -29,20 +29,31 @@ class SkillGraphEmbedder:
 
     def load_index(self) -> bool:
         """Loads the FAISS index and pickle metadata mapping."""
-        if os.path.exists(settings.FAISS_INDEX_PATH) and os.path.exists(settings.FAISS_METADATA_PATH):
+        index_path = settings.FAISS_INDEX_PATH
+        meta_path = settings.FAISS_METADATA_PATH
+        
+        # Check fallback to root if not found in data/
+        if not os.path.exists(index_path) or not os.path.exists(meta_path):
+            root_index = os.path.basename(settings.FAISS_INDEX_PATH)
+            root_meta = os.path.basename(settings.FAISS_METADATA_PATH)
+            if os.path.exists(root_index) and os.path.exists(root_meta):
+                index_path = root_index
+                meta_path = root_meta
+
+        if os.path.exists(index_path) and os.path.exists(meta_path):
             try:
                 import faiss
-                self.index = faiss.read_index(settings.FAISS_INDEX_PATH)
-                with open(settings.FAISS_METADATA_PATH, 'rb') as f:
+                self.index = faiss.read_index(index_path)
+                with open(meta_path, 'rb') as f:
                     self.metadata = pickle.load(f)
-                print(f"Loaded FAISS index with {self.index.ntotal} elements.")
+                print(f"Loaded FAISS index from {index_path} with {self.index.ntotal} elements.")
                 return True
             except Exception as e:
-                print(f"Error loading FAISS index: {e}")
+                print(f"Error loading FAISS index from {index_path}: {e}")
                 self.index = None
                 self.metadata = {}
         else:
-            print("FAISS index files not found. Vector search will be unavailable until indexed.")
+            print(f"FAISS index files not found at {index_path}. Vector search will be unavailable until indexed.")
         return False
 
     def get_embedding(self, text: str) -> np.ndarray:

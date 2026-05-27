@@ -16,41 +16,82 @@ class SkillGraphRecommender:
 
     def load_model(self):
         """Loads trained GNN model and ID mapping files if available."""
+        # Determine path prefix and format (check data/ or root, json or pkl)
+        prefix = ""
+        use_json = False
+        
+        # Check JSON files first (preferred because they are committed to git)
+        if os.path.exists("data/skill_id_map.json"):
+            prefix = "data/"
+            use_json = True
+        elif os.path.exists("skill_id_map.json"):
+            prefix = ""
+            use_json = True
+        # Check PKL files (fallback)
+        elif os.path.exists("data/skill_id_map.pkl"):
+            prefix = "data/"
+            use_json = False
+        elif os.path.exists("skill_id_map.pkl"):
+            prefix = ""
+            use_json = False
+        else:
+            print("GNN mappings (skill_id_map.json / skill_id_map.pkl) not found. Running in semantic-only fallback mode.")
+            self.model = None
+            return
+
+        ext = "json" if use_json else "pkl"
+        fused_path = os.path.join(prefix, "fused_embeddings.pkl")
+        if not os.path.exists(fused_path) and os.path.exists("fused_embeddings.pkl"):
+            fused_path = "fused_embeddings.pkl"
+
+        skill_map_path = os.path.join(prefix, f"skill_id_map.{ext}")
+        occ_map_path = os.path.join(prefix, f"occ_id_map.{ext}")
+
+        def load_mapping(path, is_json):
+            if is_json:
+                import json
+                with open(path, "r") as f:
+                    data = json.load(f)
+                # Convert string keys back to integers for to_id
+                if "to_id" in data:
+                    data["to_id"] = {int(k): v for k, v in data["to_id"].items()}
+                return data
+            else:
+                with open(path, "rb") as f:
+                    return pickle.load(f)
+
         # 1. First check if we have pre-computed fused GNN embeddings (preferred production route)
-        if os.path.exists("data/fused_embeddings.pkl") and os.path.exists("data/skill_id_map.pkl"):
+        if os.path.exists(fused_path):
             try:
-                with open("data/skill_id_map.pkl", "rb") as f:
-                    self.skill_map = pickle.load(f)
-                with open("data/occ_id_map.pkl", "rb") as f:
-                    self.occ_map = pickle.load(f)
-                with open("data/fused_embeddings.pkl", "rb") as f:
+                self.skill_map = load_mapping(skill_map_path, use_json)
+                self.occ_map = load_mapping(occ_map_path, use_json)
+                with open(fused_path, "rb") as f:
                     self.fused_embeddings = pickle.load(f)
                 self.model = "LOADED"
-                print("Pre-computed GNN fused embeddings successfully loaded from disk.")
+                print(f"Pre-computed GNN fused embeddings successfully loaded from {fused_path}.")
                 return
             except Exception as e:
                 print(f"Error loading cached GNN fused embeddings: {e}. Falling back to lazy loading.")
 
         # 2. Check if we can lazy-load via PyTorch weights (fallback)
-        if os.path.exists(settings.GNN_MODEL_SAVE_PATH) and os.path.exists("data/skill_id_map.pkl"):
+        model_path = settings.GNN_MODEL_SAVE_PATH if prefix == "data/" else "gnn_model.pt"
+        if not os.path.exists(model_path) and os.path.exists("gnn_model.pt"):
+            model_path = "gnn_model.pt"
+
+        if os.path.exists(model_path):
             try:
                 # Load mappings
-                with open("data/skill_id_map.pkl", "rb") as f:
-                    self.skill_map = pickle.load(f)
-                with open("data/occ_id_map.pkl", "rb") as f:
-                    self.occ_map = pickle.load(f)
+                self.skill_map = load_mapping(skill_map_path, use_json)
+                self.occ_map = load_mapping(occ_map_path, use_json)
 
                 # Initialize model architecture to load state dict
-                # PyG HeteroData is needed to get metadata schema
-                # Since loading graph data requires DB, we can wrap this in async to run it, 
-                # or run a quick sync-blocking query or run on first recommendation call
                 self.model = "PENDING_LAZY_LOAD"
-                print("GNN model files detected. Lazy loading on first recommendation request.")
+                print(f"GNN model weights detected at {model_path}. Lazy loading on first recommendation request.")
             except Exception as e:
                 print(f"Error preparing GNN model load: {e}")
                 self.model = None
         else:
-            print("GNN weights not found. Running in semantic-only fallback mode.")
+            print(f"GNN weights not found at {model_path}. Running in semantic-only fallback mode.")
 
     async def _lazy_load_gnn_fused(self):
         """Loads GNN model weights and computes fused embeddings."""
@@ -84,7 +125,10 @@ class SkillGraphRecommender:
             ).to(device)
             
             # Load weights
-            state_dict = torch.load(settings.GNN_MODEL_SAVE_PATH, map_location=device)
+            model_path = settings.GNN_MODEL_SAVE_PATH
+            if not os.path.exists(model_path) and os.path.exists("gnn_model.pt"):
+                model_path = "gnn_model.pt"
+            state_dict = torch.load(model_path, map_location=device)
             model_arch.load_state_dict(state_dict)
             model_arch.eval()
             

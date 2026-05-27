@@ -101,8 +101,8 @@ Hugging Face requires Git LFS for binary files. The simplest way to handle this 
 ### Step 5: Update Your Frontend API URL
 Update the API URL in your Vercel configuration or frontend environment variables:
 * Set **`NEXT_PUBLIC_API_URL`** to:
-  `https://YOUR_USERNAME-YOUR_SPACE_NAME.hf.space/api/v1`
+  `https://vijayk12-skillgraph-backend.hf.space/api/v1`
 * Set **`NEXT_PUBLIC_WS_URL`** to:
-  `wss://YOUR_USERNAME-YOUR_SPACE_NAME.hf.space/api/v1/assistant/ws/chat`
+  `wss://vijayk12-skillgraph-backend.hf.space/api/v1/assistant/ws/chat`
 
 Your requests will now process instantly!

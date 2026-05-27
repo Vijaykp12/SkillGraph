@@ -1,0 +1,15 @@
+# Local data binary models (uploaded via Web UI instead)
+data/*.bin
+data/*.pkl
+data/*.pt
+
+# Environments
+venv/
+.venv/
+env/
+.env
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/

@@ -51,6 +51,13 @@ async def train_model():
     with open("data/occ_id_map.pkl", "wb") as f:
         pickle.dump(occ_id_map, f)
 
+    # Save mapping files as JSON too (committed to Git for zero-setup HF space deployments)
+    import json
+    with open("data/skill_id_map.json", "w") as f:
+        json.dump(skill_id_map, f, indent=2)
+    with open("data/occ_id_map.json", "w") as f:
+        json.dump(occ_id_map, f, indent=2)
+
     # 2. Setup Model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using GNN compute device: {device}")

@@ -45,3 +45,28 @@ app.include_router(assistant.router, prefix=f"{settings.API_V1_STR}/assistant", 
 @app.get("/")
 def read_root():
     return {"status": "online", "service": "SkillGraph Workforce Intelligence API"}
+
+@app.get("/debug")
+def debug_status():
+    from app.ai.recommender import recommender
+    from app.ai.embedder import embedder_instance
+    import os
+    
+    cwd_files = os.listdir(".") if os.path.exists(".") else []
+    data_files = os.listdir("data") if os.path.exists("data") else []
+    
+    return {
+        "cwd": os.getcwd(),
+        "cwd_files": cwd_files,
+        "data_files": data_files,
+        "recommender_model": str(recommender.model),
+        "has_fused_embeddings": recommender.fused_embeddings is not None,
+        "has_skill_map": recommender.skill_map is not None,
+        "has_occ_map": recommender.occ_map is not None,
+        "fused_embeddings_keys": list(recommender.fused_embeddings.keys()) if recommender.fused_embeddings else None,
+        "occ_map_keys_count": len(recommender.occ_map["to_idx"]) if recommender.occ_map else 0,
+        "skill_map_keys_count": len(recommender.skill_map["to_idx"]) if recommender.skill_map else 0,
+        "embedder_has_index": embedder_instance.index is not None,
+        "embedder_index_count": embedder_instance.index.ntotal if embedder_instance.index else 0,
+        "embedder_metadata_count": len(embedder_instance.metadata) if embedder_instance.metadata else 0,
+    }
