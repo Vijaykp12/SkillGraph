@@ -71,3 +71,29 @@ git push
 
 #### Step 3: Deploy to Render
 Render will deploy the new build. Because `fused_embeddings.pkl` is loaded instantly at startup, the container starts up immediately, memory consumption stays under **120MB**, and the skill gap analysis responses return in **milliseconds** without crashing the server.
+
+---
+
+## 📌 Incident 2: Docker Build Failure on Render due to Invalid COPY statement
+
+### 🔍 Symptoms
+* Even after pushing the `fused_embeddings.pkl` cache and recommender updates, the deployed backend remains down (returning a **502 Bad Gateway** or pending connection timeout).
+* Render dashboard shows the build has failed and is unable to deploy the new container.
+
+### 🧩 Root Cause
+The `backend/Dockerfile` had the following line:
+`COPY ../scripts /scripts`
+Since the Docker build context is configured as the `backend/` directory on Render, Docker forbids pointing to paths outside the build context using `..` relative paths. This throws a build error immediately. Furthermore, because `scripts` is inside `backend/scripts/`, it is already copied into the image by the preceding `COPY . .` instruction, making this line both invalid and redundant.
+
+### 🚀 Solution
+Removed the line `COPY ../scripts /scripts` from the Dockerfile.
+
+### 📋 How to Deploy the Fix
+Commit and push the updated Dockerfile to GitHub:
+```bash
+git add backend/Dockerfile
+git commit -m "fix: remove invalid COPY statement from Dockerfile to fix Render build context error"
+git push
+```
+Render will trigger a fresh build and deploy the container successfully.
+
