@@ -97,3 +97,29 @@ git push
 ```
 Render will trigger a fresh build and deploy the container successfully.
 
+---
+
+## 📌 Incident 3: Indefinite Loading on Skill Gap Radar Page due to Sequentially-Looped Queries & Long Timeouts
+
+### 🔍 Symptoms
+* The **Skill DNA Mapping** and **Profile Overview** tabs work properly.
+* The **Skill Gap Radar** page hangs indefinitely on the loading spinner, even though `/gap-analysis` responds instantly.
+* The backend server event loop becomes blocked and unresponsive to subsequent requests.
+
+### 🧩 Root Cause
+1. When navigating to the Skill Gap Radar page, the frontend calls `/auth/profile` and `/recs/gap-analysis`, followed immediately by `/recs/learning-resources` to build the recommended training roadmap for missing skills.
+2. Inside `/recs/learning-resources` (in `recommendations.py`), the backend performed N sequential database requests inside a loop (`for skill_id in missing_skill_ids:`) to fetch matching courses for each missing skill.
+3. If Neo4j was offline or unreachable, each sequential request would block and wait for the default connection timeout of **30 seconds**. With 5+ missing skills, the route would take up to **150 seconds** to complete, clogging Uvicorn's event loop and appearing frozen to the user.
+
+### 🚀 Solution
+1. **Single Query Batching**: We refactored the loop in `app/api/endpoints/recommendations.py` to fetch all course recommendations in a single Cypher query using the `IN` clause: `WHERE s.id IN $missing_ids`. This reduces N roundtrips down to exactly 1.
+2. **Fast Driver Timeout**: We configured the Neo4j driver in `app/db/database.py` with `connection_timeout=2.0` seconds. If Neo4j is offline, the connection fails fast (within 2 seconds) and falls back to mock recommendations instantly, avoiding blocking Uvicorn's thread.
+
+### 📋 How to Deploy the Fix
+Commit and push the backend updates to GitHub:
+```bash
+git add backend/app/api/endpoints/recommendations.py backend/app/db/database.py
+git commit -m "fix: optimize learning recommendations with single query and 2s timeout on neo4j driver"
+git push
+```
+Render will build and deploy the updated service automatically.
