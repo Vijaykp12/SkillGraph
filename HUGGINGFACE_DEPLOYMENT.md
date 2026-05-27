@@ -58,7 +58,9 @@ cd backend
 # Initialize Git inside the backend directory (Hugging Face expects the Dockerfile at the root of the repo)
 git init
 git checkout -b main
-git remote add hf https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
+
+# Configure remote with your username and write token embedded to bypass password authentication
+git remote add hf https://YOUR_USERNAME:YOUR_WRITE_TOKEN@huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
 
 # Add files, making sure to include the data cache!
 git add .
@@ -68,7 +70,7 @@ git commit -m "deploy: initial Hugging Face deployment"
 git push --force hf main
 ```
 
-*Note: Replace `YOUR_USERNAME` and `YOUR_SPACE_NAME` with your actual Hugging Face details. You may need to provide a **Hugging Face User Access Token** (created in your HF settings under Access Tokens) as the password when pushing.*
+*Note: Replace `YOUR_USERNAME` with `vijayk12`, `YOUR_SPACE_NAME` with `skillgraph-backend`, and `YOUR_WRITE_TOKEN` with your Hugging Face User Access Token (which you can generate in your Hugging Face Profile Settings -> Access Tokens with the **Write** role).*
 
 ---
 
