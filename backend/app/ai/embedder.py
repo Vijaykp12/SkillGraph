@@ -16,8 +16,11 @@ class SkillGraphEmbedder:
         if self._model is None:
             # Set thread limits before loading SentenceTransformer/PyTorch
             import torch
-            torch.set_num_threads(1)
-            torch.set_num_interop_threads(1)
+            try:
+                torch.set_num_threads(1)
+                torch.set_num_interop_threads(1)
+            except RuntimeError:
+                pass
             
             print(f"Lazy-initializing embedder with model: {self.model_name}")
             from sentence_transformers import SentenceTransformer

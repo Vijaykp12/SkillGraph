@@ -62,8 +62,11 @@ class SkillGraphRecommender:
         try:
             import torch
             # Apply CPU thread limits to PyTorch to save memory
-            torch.set_num_threads(1)
-            torch.set_num_interop_threads(1)
+            try:
+                torch.set_num_threads(1)
+                torch.set_num_interop_threads(1)
+            except RuntimeError:
+                pass
             
             from app.ai.dataset_loader import dataset_loader
             from app.ai.gnn_model import SkillGraphAIModel

@@ -147,3 +147,33 @@ git commit -m "fix: allow Vercel origin https://skill-graph-rho.vercel.app in CO
 git push
 ```
 Render will deploy the updated config, and the Vercel app will be able to connect to the backend without CORS issues.
+
+---
+
+## 📌 Incident 5: PyTorch Threading RuntimeError on Startup/Inference
+
+### 🔍 Symptoms
+* Requests (like `/recs/twin-simulator`) fail with a **500 Internal Server Error**.
+* The Hugging Face or Render backend logs show the following exception:
+  `RuntimeError: Error: cannot set number of interop threads after parallel work has started or set_num_interop_threads called`
+
+### 🧩 Root Cause
+To optimize memory usage, we configure PyTorch to use a single CPU thread (`torch.set_num_threads(1)` / `torch.set_num_interop_threads(1)`). However, if PyTorch has already executed any tensor operations (such as converting numpy arrays to tensors in the database seeder/loader fallback) before these limits are set, the PyTorch C++ engine starts parallel workers. Attempting to set thread limits *after* parallel work has initiated is forbidden by PyTorch and throws a `RuntimeError`, crashing the API requests.
+
+### 🚀 Solution
+We wrapped the thread limit configuration calls inside `backend/app/ai/embedder.py` and `backend/app/ai/recommender.py` inside `try...except RuntimeError: pass` blocks. This allows PyTorch to gracefully bypass the thread-limit configuration if the parallel engine is already initialized, avoiding any crashes.
+
+### 📋 How to Deploy the Fix
+Commit and push the updates to GitHub and Hugging Face:
+```bash
+git add backend/app/ai/embedder.py backend/app/ai/recommender.py
+git commit -m "fix: wrap PyTorch thread limit calls in try-except to avoid RuntimeError"
+git push
+```
+Or for Hugging Face Spaces:
+```bash
+# Push the updated code files to Hugging Face
+git push --force hf main
+```
+Hugging Face will rebuild and run the server successfully without crashes!
+
