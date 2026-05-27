@@ -26,7 +26,6 @@ RUN pip install --upgrade pip && \
 
 # Copy backend source
 COPY . .
-COPY ../scripts /scripts
 
 EXPOSE 8000
 
