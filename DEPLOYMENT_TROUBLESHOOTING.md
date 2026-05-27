@@ -123,3 +123,27 @@ git commit -m "fix: optimize learning recommendations with single query and 2s t
 git push
 ```
 Render will build and deploy the updated service automatically.
+
+---
+
+## 📌 Incident 4: API Requests Blocked by CORS Policy on Vercel Deployment
+
+### 🔍 Symptoms
+* API calls (like `/recs/gap-analysis`) fail immediately with `net::ERR_FAILED` or `Failed to fetch`.
+* The browser console displays the following error:
+  `Access to fetch at 'https://skillgraph-backend-14k8.onrender.com/api/v1/recs/gap-analysis' from origin 'https://skill-graph-rho.vercel.app' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.`
+
+### 🧩 Root Cause
+The frontend application is hosted on Vercel at `https://skill-graph-rho.vercel.app`. However, this URL was not included in the default `BACKEND_CORS_ORIGINS` list inside the backend configuration file (`app/core/config.py`). Because of this, the FastAPI CORSMiddleware rejected the request preflights and did not return the required `Access-Control-Allow-Origin` headers, causing the browser to block the frontend's API requests.
+
+### 🚀 Solution
+Added the production Vercel frontend URL `"https://skill-graph-rho.vercel.app"` to the `BACKEND_CORS_ORIGINS` list in `backend/app/core/config.py`.
+
+### 📋 How to Deploy the Fix
+Commit and push the updates:
+```bash
+git add backend/app/core/config.py
+git commit -m "fix: allow Vercel origin https://skill-graph-rho.vercel.app in CORS backend settings"
+git push
+```
+Render will deploy the updated config, and the Vercel app will be able to connect to the backend without CORS issues.
