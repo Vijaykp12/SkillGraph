@@ -20,23 +20,28 @@ SkillGraph is built as a modular, high-performance system leveraging a heterogen
 
 ## 🚀 Key Features & Interface
 
-### 📊 1. Workforce Intelligence Dashboard
-Manage your career embeddings, upload resumes, and explore skill structures. The glassmorphic interface displays your current metrics and syncing status with the backend GNN engine.
+### 📊 1. Workforce Intelligence Profile
+Manage your career embeddings, upload resumes, and explore skill structures. The glassmorphic interface displays your current metrics, parsed skills tags, and syncing status with the backend GNN engine.
 
 ![Workforce Intelligence Profile](assets/screenshot_dashboard.png)
 
-### 🧬 2. Skill DNA Mapping & Radar Chart
-View an interactive profile of your skillsets, proficiencies, and overlaps. The Skill Gap Radar overlays your current Skill DNA against target occupation requirements.
+### 🧬 2. Skill DNA Mapping
+Visualize your technical competencies and structural overlaps. The dynamic radar/spider chart maps your personalized workforce intelligence signature across diverse domains.
 
-![Skill DNA Radar Map](assets/screenshot_dna_radar.png)
+![Skill DNA Mapping](assets/screenshot_dna.png)
 
-### 💬 3. AI Career Assistant
-Get tailored career transitions and custom training guidance powered by an AI-driven chatbot using streaming WebSockets.
+### 🎯 3. AI Skill Gap Radar
+Compare your current skillsets against target occupation models. Identify exact skill gaps and retrieve recommended learning roadmaps and course enrollments.
 
-![AI Career Assistant](assets/screenshot_career_assistant.png)
+![AI Skill Gap Radar](assets/screenshot_radar.png)
 
-### 🌐 4. Interactive Graph Explorer
-Explore skills and job ontologies visually using a dynamic, interactive force-directed graph built with Cytoscape.js.
+### ✈️ 4. AI Career Twin Simulator
+Predict multi-step career transitions and calculate your career transition momentum score and velocity indicators using GNN link predictions.
+
+![AI Career Twin Simulator](assets/screenshot_twin.png)
+
+### 🌐 5. Interactive Graph Explorer
+Explore skills and job ontologies visually using a dynamic, interactive force-directed knowledge graph built with Cytoscape.js.
 
 ![Interactive Graph Explorer](assets/screenshot_graph_explorer.png)
 
