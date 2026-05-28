@@ -4,14 +4,41 @@ SkillGraph is an enterprise-grade platform designed to map workforce skills, bui
 
 ---
 
-## 🚀 Key Features
+## 🏗️ System Architecture & Data Flow
 
-*   **Interactive Graph Explorer**: Explore skills and job ontologies visually using a dynamic, interactive force-directed graph (built with Cytoscape.js).
-*   **AI Career Assistant**: Get tailored career transitions and custom training guidance powered by an AI-driven chatbot.
-*   **GNN Recommender System**: A Graph Neural Network model (PyTorch Geometric) that analyzes structural skill-to-job relations to identify skill gaps and recommend paths.
-*   **Skill DNA Visualizer**: View an interactive profile of your skillsets, proficiencies, and overlaps.
-*   **Hybrid Database Architecture**: High-speed relational mapping via PostgreSQL + deep relation-based querying via Neo4j.
-*   **Asynchronous Processing**: Background job queues managed by Celery and Redis to handle model training, indexing, and CV parsing.
+SkillGraph is built as a modular, high-performance system leveraging a heterogeneous graph structure. The data flow moves seamlessly from resume ingestion to GNN-fused career recommendation:
+
+![SkillGraph System Architecture](assets/architecture_diagram.png)
+
+### 🔄 The Ingestion & Recommendation Loop
+1. **Resume Ingestion**: A user uploads a PDF resume. The backend extracts the layout, parses skills heuristically, and matches them dynamically against the Neo4j ontology.
+2. **Skill DNA Generation**: The user's skills are mapped against the required skills of all standard occupations using Graph and DB lookups.
+3. **GNN Embeddings**: A Heterogeneous Graph Transformer (HGT) / Relational Graph Attention Network (RGAT) matches users to careers by calculating the similarity of their fused structural-semantic embeddings.
+4. **Career Twin Simulation**: If a user simulates a transition, the Neo4j database computes the shortest path between occupations, and the recommender predicts skill gaps and pulls appropriate learning resources.
+
+---
+
+## 🚀 Key Features & Interface
+
+### 📊 1. Workforce Intelligence Dashboard
+Manage your career embeddings, upload resumes, and explore skill structures. The glassmorphic interface displays your current metrics and syncing status with the backend GNN engine.
+
+![Workforce Intelligence Profile](assets/screenshot_dashboard.png)
+
+### 🧬 2. Skill DNA Mapping & Radar Chart
+View an interactive profile of your skillsets, proficiencies, and overlaps. The Skill Gap Radar overlays your current Skill DNA against target occupation requirements.
+
+![Skill DNA Radar Map](assets/screenshot_dna_radar.png)
+
+### 💬 3. AI Career Assistant
+Get tailored career transitions and custom training guidance powered by an AI-driven chatbot using streaming WebSockets.
+
+![AI Career Assistant](assets/screenshot_career_assistant.png)
+
+### 🌐 4. Interactive Graph Explorer
+Explore skills and job ontologies visually using a dynamic, interactive force-directed graph built with Cytoscape.js.
+
+![Interactive Graph Explorer](assets/screenshot_graph_explorer.png)
 
 ---
 
@@ -55,6 +82,7 @@ SkillGraph is an enterprise-grade platform designed to map workforce skills, bui
 ├── infrastructure/
 │   ├── docker/          # Docker Compose configurations
 │   └── kubernetes/      # Kubernetes deployment files
+└── assets/              # Architecture diagrams and UI screenshots
 ```
 
 ---
